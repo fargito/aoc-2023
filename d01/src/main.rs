@@ -31,28 +31,30 @@ fn main() {
 fn get_calibration_from_line(line: &str) -> u32 {
     let (mut first_digit, mut last_digit) = (None::<u32>, None::<u32>);
 
-    for (pos, _) in line.char_indices() {
-        if let Some(m) = RE.find_at(line, pos) {
-            let digit = match m.as_str() {
-                "zero" => 0,
-                "one" => 1,
-                "two" => 2,
-                "three" => 3,
-                "four" => 4,
-                "five" => 5,
-                "six" => 6,
-                "seven" => 7,
-                "eight" => 8,
-                "nine" => 9,
-                res => res.parse().unwrap(),
-            };
+    let mut pos = 0;
 
-            last_digit = Some(digit);
-
-            if first_digit.is_none() {
-                first_digit = Some(digit);
-            }
+    while let Some(m) = RE.find_at(line, pos) {
+        let digit = match m.as_str() {
+            "zero" => 0,
+            "one" => 1,
+            "two" => 2,
+            "three" => 3,
+            "four" => 4,
+            "five" => 5,
+            "six" => 6,
+            "seven" => 7,
+            "eight" => 8,
+            "nine" => 9,
+            res => res.parse().unwrap(),
         };
+
+        last_digit = Some(digit);
+
+        if first_digit.is_none() {
+            first_digit = Some(digit);
+        }
+
+        pos += 1;
     }
 
     // at this point, given the input, both values are defined
