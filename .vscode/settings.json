@@ -1,0 +1,10 @@
+{
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "editor.formatOnSave": true,
+  "search.exclude": {
+    "Cargo.lock": true
+  },
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
