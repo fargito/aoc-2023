@@ -1,3 +1,5 @@
+use std::cmp::max;
+
 use helpers::read_lines;
 use lazy_static::lazy_static;
 use regex::Regex;
@@ -24,14 +26,7 @@ fn main() {
 }
 
 fn parse_game(line: &str) -> u64 {
-    let game_id: u64 = GAME_ID_REGEX
-        .captures(line)
-        .unwrap()
-        .name("id")
-        .unwrap()
-        .as_str()
-        .parse()
-        .unwrap();
+    let (mut min_red, mut min_green, mut min_blue) = (0, 0, 0);
 
     // remove the game id beginning
     let cleaned_line = GAME_ID_REGEX.replace_all(line, "");
@@ -41,18 +36,20 @@ fn parse_game(line: &str) -> u64 {
             let count: u64 = m.name("count").unwrap().as_str().parse().unwrap();
             let color = m.name("color").unwrap().as_str();
 
-            let is_draw_ok = match color {
-                "red" => count <= 12,
-                "green" => count <= 13,
-                "blue" => count <= 14,
+            match color {
+                "red" => {
+                    min_red = max(min_red, count);
+                }
+                "green" => {
+                    min_green = max(min_green, count);
+                }
+                "blue" => {
+                    min_blue = max(min_blue, count);
+                }
                 _ => panic!(),
             };
-
-            if !is_draw_ok {
-                return 0;
-            }
         }
     }
 
-    game_id
+    min_blue * min_green * min_red
 }
