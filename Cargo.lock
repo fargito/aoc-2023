@@ -25,6 +25,8 @@ name = "d02"
 version = "0.1.0"
 dependencies = [
  "helpers",
+ "lazy_static",
+ "regex",
 ]
 
 [[package]]
