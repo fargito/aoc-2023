@@ -54,7 +54,7 @@ fn get_calibration_from_line(line: &str) -> u32 {
             first_digit = Some(digit);
         }
 
-        pos += 1;
+        pos = m.start() + 1; // start one value after the beginning of the current match
     }
 
     // at this point, given the input, both values are defined
