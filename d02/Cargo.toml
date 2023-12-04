@@ -7,6 +7,3 @@ edition = "2021"
 
 [dependencies]
 helpers = { path = "../helpers" }
-
-lazy_static = "1.4.0"
-regex = "1.10.2"

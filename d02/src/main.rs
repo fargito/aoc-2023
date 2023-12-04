@@ -1,8 +1,6 @@
 use std::cmp::max;
 
-use helpers::read_lines;
-use lazy_static::lazy_static;
-use regex::Regex;
+use helpers::{lazy_static, read_lines, Regex};
 
 lazy_static! {
     static ref GAME_ID_REGEX: Regex = Regex::new("Game (?<id>\\d+): ").unwrap();
