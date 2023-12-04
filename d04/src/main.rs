@@ -8,24 +8,35 @@ lazy_static! {
 }
 
 fn main() {
-    let mut result = 0;
+    let mut lines: Vec<String> = vec![];
 
-    if let Ok(lines) = read_lines("./d04/inputs/input.txt") {
+    if let Ok(lines_reader) = read_lines("./d04/inputs/input.txt") {
         // Consumes the iterator, returns an (Optional) String
-        for line in lines {
+        for line in lines_reader {
             if let Ok(line) = line {
-                result += compute_line(&line);
+                lines.push(line);
             }
         }
     }
 
-    println!("result: {result}");
+    let mut card_copies = vec![1_usize; lines.len()];
+
+    for (index, line) in lines.iter().enumerate() {
+        let res = compute_line(&line);
+        let index_copies = card_copies[index];
+
+        for i in index + 1..index + res + 1 {
+            card_copies[i] += index_copies;
+        }
+    }
+
+    println!("result: {}", card_copies.iter().sum::<usize>());
 }
 
-fn compute_line(line: &str) -> u64 {
+fn compute_line(line: &str) -> usize {
     // store them in a hashmap in order to check efficiently
-    let mut winning_numbers: HashSet<u64> = HashSet::new();
-    let mut matches: HashSet<u64> = HashSet::new();
+    let mut winning_numbers: HashSet<usize> = HashSet::new();
+    let mut matches: HashSet<usize> = HashSet::new();
 
     // remove the game id beginning
     let cleaned_line = CARD_NUMBER_REGEX.replace_all(line, "");
@@ -47,9 +58,5 @@ fn compute_line(line: &str) -> u64 {
         }
     }
 
-    if matches.len() == 0 {
-        0
-    } else {
-        2_u64.pow((matches.len() - 1).try_into().unwrap())
-    }
+    matches.len()
 }
