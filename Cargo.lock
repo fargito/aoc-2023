@@ -15,9 +15,21 @@ dependencies = [
 name = "d01"
 version = "0.1.0"
 dependencies = [
+ "helpers",
  "lazy_static",
  "regex",
 ]
+
+[[package]]
+name = "d02"
+version = "0.1.0"
+dependencies = [
+ "helpers",
+]
+
+[[package]]
+name = "helpers"
+version = "0.1.0"
 
 [[package]]
 name = "lazy_static"

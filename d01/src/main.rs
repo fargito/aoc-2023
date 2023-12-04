@@ -1,9 +1,4 @@
-use std::{
-    fs::File,
-    io::{self, BufRead},
-    path::Path,
-};
-
+use helpers::read_lines;
 use lazy_static::lazy_static;
 use regex::Regex;
 
@@ -59,16 +54,6 @@ fn get_calibration_from_line(line: &str) -> u32 {
 
     // at this point, given the input, both values are defined
     first_digit.unwrap() * 10 + last_digit.unwrap()
-}
-
-// The output is wrapped in a Result to allow matching on errors
-// Returns an Iterator to the Reader of the lines of the file.
-fn read_lines<P>(filename: P) -> io::Result<io::Lines<io::BufReader<File>>>
-where
-    P: AsRef<Path>,
-{
-    let file = File::open(filename)?;
-    Ok(io::BufReader::new(file).lines())
 }
 
 #[cfg(test)]

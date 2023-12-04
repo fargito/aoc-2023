@@ -1,5 +1,5 @@
 [package]
-name = "d01"
+name = "d02"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,6 +7,3 @@ edition = "2021"
 
 [dependencies]
 helpers = { path = "../helpers" }
-
-lazy_static = "1.4.0"
-regex = "1.10.2"
