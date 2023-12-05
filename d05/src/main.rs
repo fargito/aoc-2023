@@ -5,6 +5,8 @@ use helpers::{lazy_static, Regex};
 lazy_static! {
     static ref INPUT_MAP_REGEX: Regex =
         Regex::new("(?<map_name>.+) map:\n(?<map_values>(.+\n)*)").unwrap();
+    static ref SEED_PAIRS_REGEX: Regex =
+        Regex::new("(?<seed_start>\\d+) (?<seed_range>\\d+)").unwrap();
 }
 
 fn main() {
@@ -30,31 +32,47 @@ fn main() {
         }
     }
 
-    let min_soil = input
-        .lines()
-        .next() // only get the first line for the seeds
-        .unwrap()
-        .split(":")
-        .last()
-        .unwrap()
-        .trim_start()
-        .split(" ")
-        .map(|v| {
-            let seed = v.parse::<usize>().unwrap();
+    let min_soil = SEED_PAIRS_REGEX
+        .captures_iter(input.lines().next().unwrap()) // only use the first line for the seeds
+        .map(|m| {
+            let seed_start: usize = m.name("seed_start").unwrap().as_str().parse().unwrap();
+            let seed_range: usize = m.name("seed_range").unwrap().as_str().parse().unwrap();
 
-            let soil = get_destination(&maps, "seed-to-soil", seed).unwrap_or(seed);
-            let fertilizer = get_destination(&maps, "soil-to-fertilizer", soil).unwrap_or(soil);
-            let water =
-                get_destination(&maps, "fertilizer-to-water", fertilizer).unwrap_or(fertilizer);
-            let light = get_destination(&maps, "water-to-light", water).unwrap_or(water);
-            let temperature =
-                get_destination(&maps, "light-to-temperature", light).unwrap_or(light);
-            let humidity = get_destination(&maps, "temperature-to-humidity", temperature)
-                .unwrap_or(temperature);
-            let location =
-                get_destination(&maps, "humidity-to-location", humidity).unwrap_or(humidity);
+            let mut min_location: usize = usize::MAX; // start with the largest value
 
-            location.to_owned()
+            let mut seed = seed_start;
+
+            while seed < seed_start + seed_range {
+                let (soil, soil_jump) = get_destination_and_jump(&maps, "seed-to-soil", seed);
+                let (fertilizer, fertilizer_jump) =
+                    get_destination_and_jump(&maps, "soil-to-fertilizer", soil);
+                let (water, water_jump) =
+                    get_destination_and_jump(&maps, "fertilizer-to-water", fertilizer);
+                let (light, light_jump) = get_destination_and_jump(&maps, "water-to-light", water);
+                let (temperature, temperature_jump) =
+                    get_destination_and_jump(&maps, "light-to-temperature", light);
+                let (humidity, humidity_jump) =
+                    get_destination_and_jump(&maps, "temperature-to-humidity", temperature);
+                let (location, location_jump) =
+                    get_destination_and_jump(&maps, "humidity-to-location", humidity);
+
+                min_location = std::cmp::min(min_location, location.to_owned());
+
+                seed += vec![
+                    soil_jump,
+                    fertilizer_jump,
+                    water_jump,
+                    light_jump,
+                    temperature_jump,
+                    humidity_jump,
+                    location_jump,
+                ]
+                .iter()
+                .min()
+                .unwrap(); // jump from the min possible jump
+            }
+
+            min_location
         })
         .min()
         .unwrap();
@@ -62,15 +80,39 @@ fn main() {
     println!("min_soil {min_soil}");
 }
 
-fn get_destination(
+fn get_destination_and_jump(
     maps: &HashMap<String, Vec<(usize, usize, usize)>>,
     map_name: &str,
     source: usize,
-) -> Option<usize> {
-    maps.get(map_name)?
-        .iter()
+) -> (usize, usize) {
+    let map = maps.get(map_name).unwrap();
+
+    map.iter()
         .find(|(_destination_start, source_start, range)| {
             source >= *source_start && source < *source_start + *range
         })
-        .map(|(destination_start, source_start, _range)| *destination_start + source - source_start)
+        .map_or_else(
+            || {
+                // if we haven't found an acceptable range, we look for the closest source_start
+                let jump = map
+                    .iter()
+                    .map(|(_destination_start, source_start, _range)| {
+                        if source >= *source_start {
+                            usize::MAX
+                        } else {
+                            source_start - source
+                        }
+                    })
+                    .min()
+                    .unwrap();
+
+                (source, jump)
+            },
+            |(destination_start, source_start, range)| {
+                (
+                    *destination_start + source - source_start,
+                    source_start + range - source,
+                )
+            },
+        )
 }
