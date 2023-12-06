@@ -11,14 +11,14 @@ fn main() {
 
     let times: Vec<u64> = INPUT_REGEX
         .find_iter(
-            it.next().unwrap(), // first line
+            it.next().unwrap().replace(" ", "").as_str(), // first line with no spaces
         )
         .map(|m| m.as_str().parse().unwrap())
         .collect();
 
     let distances: Vec<u64> = INPUT_REGEX
         .find_iter(
-            it.next().unwrap(), // second line
+            it.next().unwrap().replace(" ", "").as_str(), // second line with no spaces
         )
         .map(|m| m.as_str().parse().unwrap())
         .collect();
