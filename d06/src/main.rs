@@ -26,28 +26,30 @@ fn main() {
     let res = times
         .iter()
         .zip(distances.iter())
-        .map(|(total_time, total_distance)| {
-            // binary search for performance
-            let mut max_nok_time = 0;
-            let mut min_ok_time = total_time / 2;
-
-            while min_ok_time - max_nok_time > 1 {
-                let time_to_eval = max_nok_time + (min_ok_time - max_nok_time) / 2;
-
-                if evaluate(time_to_eval, *total_time) > *total_distance {
-                    // then time is ok
-                    min_ok_time = time_to_eval;
-                } else {
-                    max_nok_time = time_to_eval;
-                }
-            }
-
-            total_time + 1 - (2 * (max_nok_time + 1))
-        })
+        .map(get_ways_to_win)
         .reduce(|acc, e| acc * e)
         .unwrap();
 
     println!("result = {res}");
+}
+
+fn get_ways_to_win((total_time, total_distance): (&u64, &u64)) -> u64 {
+    // binary search for performance
+    let mut max_nok_time = 0;
+    let mut min_ok_time = total_time / 2;
+
+    while min_ok_time - max_nok_time > 1 {
+        let time_to_eval = max_nok_time + (min_ok_time - max_nok_time) / 2;
+
+        if evaluate(time_to_eval, *total_time) > *total_distance {
+            // then time is ok
+            min_ok_time = time_to_eval;
+        } else {
+            max_nok_time = time_to_eval;
+        }
+    }
+
+    total_time + 1 - (2 * (max_nok_time + 1))
 }
 
 fn evaluate(time: u64, total_time: u64) -> u64 {
