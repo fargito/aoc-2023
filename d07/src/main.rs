@@ -15,7 +15,7 @@ fn main() {
             let value = c.name("value").unwrap().as_str();
             let bid = c.name("bid").unwrap().as_str().parse().unwrap();
 
-            let hand_type = get_hand_type(&value);
+            let hand_type = get_hand_type_with_jokers(&value);
 
             Hand {
                 value,
@@ -91,6 +91,49 @@ fn get_hand_type(card_value: &str) -> HandType {
     }
 }
 
+fn get_hand_type_with_jokers(card_value: &str) -> HandType {
+    let mut chars = HashMap::new();
+
+    card_value.chars().fold(&mut chars, |acc, el| {
+        let e = acc.entry(el).or_insert(0_u32);
+
+        *e += 1;
+
+        acc
+    });
+
+    // start_by removing jokers
+    let mut jokers = chars.remove(&'J').unwrap_or(0);
+
+    let mut values = chars.values_mut().collect::<Vec<&mut u32>>();
+
+    values.sort();
+    values.reverse();
+
+    // add the jokers again to the first value
+    if values.len() > 0 {
+        *values[0] += jokers;
+    } else {
+        values.push(&mut jokers);
+    }
+
+    if values.len() == 1 {
+        HandType::FiveOfAKind
+    } else if *values[0] == 4 {
+        HandType::FourOfAKind
+    } else if values.len() == 2 && *values[0] == 3 {
+        HandType::FullHouse
+    } else if *values[0] == 3 {
+        HandType::ThreeOfAKind
+    } else if *values[0] == 2 && *values[1] == 2 {
+        HandType::TwoPair
+    } else if *values[0] == 2 {
+        HandType::OnePair
+    } else {
+        HandType::HighCard
+    }
+}
+
 fn compare_hands_values(hand_a: &str, hand_b: &str) -> Ordering {
     let mut ordering = Ordering::Equal;
 
@@ -110,7 +153,7 @@ fn get_card_value(card: char) -> u8 {
         'A' => 14,
         'K' => 13,
         'Q' => 12,
-        'J' => 11,
+        'J' => 1,
         'T' => 10,
         '9' => 9,
         '8' => 8,
@@ -128,7 +171,7 @@ fn get_card_value(card: char) -> u8 {
 mod tests {
     use std::cmp::Ordering;
 
-    use crate::{compare_hands_values, get_hand_type, HandType};
+    use crate::{compare_hands_values, get_hand_type, get_hand_type_with_jokers, HandType};
 
     #[test]
     fn test_get_hand_type() {
@@ -139,6 +182,17 @@ mod tests {
         assert_eq!(get_hand_type("QQQJA"), HandType::ThreeOfAKind);
         assert_eq!(get_hand_type("QQQQQ"), HandType::FiveOfAKind);
         assert_eq!(get_hand_type("QQQQT"), HandType::FourOfAKind);
+    }
+
+    #[test]
+    fn test_get_hand_type_with_joker() {
+        assert_eq!(get_hand_type_with_jokers("32T3K"), HandType::OnePair);
+        assert_eq!(get_hand_type_with_jokers("T55J5"), HandType::FourOfAKind);
+        assert_eq!(get_hand_type_with_jokers("KK677"), HandType::TwoPair);
+        assert_eq!(get_hand_type_with_jokers("KTJJT"), HandType::FourOfAKind);
+        assert_eq!(get_hand_type_with_jokers("QQQJA"), HandType::FourOfAKind);
+        assert_eq!(get_hand_type_with_jokers("QQQQQ"), HandType::FiveOfAKind);
+        assert_eq!(get_hand_type_with_jokers("QQQQT"), HandType::FourOfAKind);
     }
 
     #[test]
