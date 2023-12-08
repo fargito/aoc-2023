@@ -56,6 +56,7 @@ enum HandType {
     FiveOfAKind,
 }
 
+#[allow(dead_code)]
 fn get_hand_type(card_value: &str) -> HandType {
     let mut chars = HashMap::new();
 
