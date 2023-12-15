@@ -1,11 +1,5 @@
 use std::collections::VecDeque;
 
-use helpers::{lazy_static, Regex};
-
-lazy_static! {
-    static ref SENSOR_REGEX: Regex = Regex::new("-?\\d+").unwrap();
-}
-
 fn main() {
     println!("Hello, world!");
     let input = include_str!("../inputs/input.txt");
